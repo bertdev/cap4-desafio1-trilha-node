@@ -61,23 +61,6 @@ describe("Create Statement", () => {
     expect(statement.type).toBe("withdraw");
   });
 
-  it("Should not be able to create a withdraw statement if the user has insufficient funds", () => {
-    expect(async () => {
-      const password = await hash("userpasswordtest", 8);
-      const user = await inMemoryUsersRepository.create({
-        name: "User Name",
-        email: "useremail@test.com",
-        password
-      });
-
-      await createStatementUseCase.execute({
-        amount: 100,
-        description: "test",
-        type: OperationType.WITHDRAW,
-        user_id: user.id as string,
-      });
-    }).rejects.toBeInstanceOf(CreateStatementError.InsufficientFunds);
-  });
 
   it("Should not be able to create any statement with an inexistent user", () => {
     expect(async () => {
@@ -88,6 +71,23 @@ describe("Create Statement", () => {
         user_id: "non-existent",
       });
     }).rejects.toBeInstanceOf(CreateStatementError.UserNotFound);
+  });
+
+  it("Should not be able to create a withdraw statement if the user has insufficient funds", () => {
+    expect(async () => {
+      const user = await inMemoryUsersRepository.create({
+        name: "User Name",
+        email: "useremail@test.com",
+        password: await hash("userpasswordtest", 8)
+      });
+
+      await createStatementUseCase.execute({
+        amount: 100,
+        description: "test",
+        type: OperationType.WITHDRAW,
+        user_id: user.id as string,
+      });
+    }).rejects.toBeInstanceOf(CreateStatementError.InsufficientFunds);
   });
 
 });
