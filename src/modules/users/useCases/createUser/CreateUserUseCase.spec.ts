@@ -3,7 +3,7 @@ import { CreateUserError } from "./CreateUserError";
 import { CreateUserUseCase } from "./CreateUserUseCase";
 
 let createUserUseCase: CreateUserUseCase;
-let inMemoryUsersRepository: InMemoryUsersRepository
+let inMemoryUsersRepository: InMemoryUsersRepository;
 
 describe("Create user", () => {
   beforeEach(() => {
@@ -34,8 +34,8 @@ describe("Create user", () => {
         name: "Other User Name",
         email: "useremail@test.com",
         password: "otheruserpasswordtest"
-      })
+      });
     }).rejects.toBeInstanceOf(CreateUserError);
-  })
+  });
 
-})
+});
