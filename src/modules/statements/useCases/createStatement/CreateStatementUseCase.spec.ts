@@ -3,6 +3,7 @@ import { CreateUserUseCase } from "../../../users/useCases/createUser/CreateUser
 import { InMemoryStatementsRepository } from "../../repositories/in-memory/InMemoryStatementsRepository";
 import { CreateStatementUseCase } from "./CreateStatementUseCase";
 import { OperationType } from './../../entities/Statement'
+import { CreateStatementError } from './CreateStatementError'
 
 let createUserUseCase: CreateUserUseCase;
 let inMemoryUsersRepository: InMemoryUsersRepository;
@@ -61,4 +62,23 @@ describe("Create Statement", () => {
     expect(statement.user_id).toBe(user.id);
     expect(statement.type).toBe("withdraw");
   });
+
+  it("Should not be able to create a withdraw statement if the user has insufficient funds", () => {
+    expect(async () => {
+      const user = await createUserUseCase.execute({
+        name: "User Name",
+        email: "useremail@test.com",
+        password: "userpasswordtest"
+      });
+
+      await createStatementUseCase.execute({
+        user_id: user.id as string,
+        type: OperationType.WITHDRAW,
+        amount: 600,
+        description: "test"
+      });
+    }).rejects.toBeInstanceOf(CreateStatementError.InsufficientFunds);
+  });
+
+
 });
