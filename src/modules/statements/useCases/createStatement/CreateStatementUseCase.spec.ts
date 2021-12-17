@@ -35,4 +35,30 @@ describe("Create Statement", () => {
     expect(statement.user_id).toBe(user.id);
     expect(statement.type).toBe("deposit");
   });
+
+  it("Should be able to create a withdraw statement", async () => {
+    const user = await createUserUseCase.execute({
+      name: "User Name",
+      email: "useremail@test.com",
+      password: "userpasswordtest"
+    });
+
+    await createStatementUseCase.execute({
+      user_id: user.id as string,
+      type: OperationType.DEPOSIT,
+      amount: 1000,
+      description: "test"
+    });
+
+    const statement = await createStatementUseCase.execute({
+      user_id: user.id as string,
+      type: OperationType.WITHDRAW,
+      amount: 600,
+      description: "test"
+    });
+
+    expect(statement).toHaveProperty("id");
+    expect(statement.user_id).toBe(user.id);
+    expect(statement.type).toBe("withdraw");
+  });
 });
