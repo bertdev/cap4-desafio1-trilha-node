@@ -69,4 +69,25 @@ describe("Create Statement", () => {
     expect(response.body.amount).toBe(400);
   });
 
+  it("Should be able to create a withdraw statement without funds", async () => {
+    const userAuthenticated = await request(app).post("/api/v1/sessions").send({
+      email: "useremail@test.com",
+      password: "userpassword"
+    });
+
+    const { token } = userAuthenticated.body;
+
+    const response = await request(app)
+      .post("/api/v1/statements/withdraw")
+      .send({
+        amount: 900,
+        description: "withdraw test",
+      })
+      .set({
+        Authorization: `Bearer ${token}`,
+      });
+
+    expect(response.status).toBe(400);
+  });
+
 });
