@@ -3,6 +3,7 @@ import { InMemoryStatementsRepository } from "../../repositories/in-memory/InMem
 import { CreateStatementUseCase } from "./CreateStatementUseCase";
 import { OperationType } from './../../entities/Statement'
 import { CreateStatementError } from './CreateStatementError'
+import { hash } from 'bcryptjs'
 
 let inMemoryUsersRepository: InMemoryUsersRepository;
 let createStatementUseCase: CreateStatementUseCase;
@@ -19,7 +20,7 @@ describe("Create Statement", () => {
     const user = await inMemoryUsersRepository.create({
       name: "User Name",
       email: "useremail@test.com",
-      password: "userpasswordtest"
+      password: await hash("userpasswordtest", 8)
     });
 
     const statement = await createStatementUseCase.execute({
@@ -38,7 +39,7 @@ describe("Create Statement", () => {
     const user = await inMemoryUsersRepository.create({
       name: "User Name",
       email: "useremail@test.com",
-      password: "userpasswordtest"
+      password: await hash("userpasswordtest", 8)
     });
 
     await createStatementUseCase.execute({
@@ -62,10 +63,11 @@ describe("Create Statement", () => {
 
   it("Should not be able to create a withdraw statement if the user has insufficient funds", () => {
     expect(async () => {
+      const password = await hash("userpasswordtest", 8);
       const user = await inMemoryUsersRepository.create({
         name: "User Name",
         email: "useremail@test.com",
-        password: "userpasswordtest"
+        password
       });
 
       await createStatementUseCase.execute({

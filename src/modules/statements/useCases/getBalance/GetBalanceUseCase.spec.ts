@@ -4,6 +4,8 @@ import { GetBalanceUseCase } from "./GetBalanceUseCase";
 import { OperationType } from "../../entities/Statement"
 import { GetBalanceError } from "./GetBalanceError";
 
+import { hash } from "bcryptjs";
+
 let getBalanceUseCase: GetBalanceUseCase;
 let inMemoryUsersRepository: InMemoryUsersRepository;
 let inMemoryStatementsRepository: InMemoryStatementsRepository;
@@ -22,7 +24,7 @@ describe("Get Balance", () => {
     const user = await inMemoryUsersRepository.create({
       name: "User Name",
       email: "useremail@test.com",
-      password: "userpasswordtest"
+      password: await hash("userpasswordtest", 8)
     });
 
     await inMemoryStatementsRepository.create({

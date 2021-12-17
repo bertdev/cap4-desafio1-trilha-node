@@ -1,24 +1,23 @@
 import { InMemoryUsersRepository } from "../../repositories/in-memory/InMemoryUsersRepository";
-import { CreateUserUseCase } from "../createUser/CreateUserUseCase";
 import { AuthenticateUserUseCase } from "./AuthenticateUserUseCase";
 import { IncorrectEmailOrPasswordError } from "./IncorrectEmailOrPasswordError";
+import { hash } from "bcryptjs"
 
-let createUserUseCase: CreateUserUseCase;
+
 let inMemoryUsersRepository: InMemoryUsersRepository;
 let authenticateUserUseCase: AuthenticateUserUseCase;
 
 describe("Authenticate User", () => {
   beforeEach(() => {
     inMemoryUsersRepository = new InMemoryUsersRepository();
-    createUserUseCase = new CreateUserUseCase(inMemoryUsersRepository);
     authenticateUserUseCase = new AuthenticateUserUseCase(inMemoryUsersRepository);
   });
 
   it("Should be able to authenticate a user passing an email and password valid", async () => {
-    await createUserUseCase.execute({
+    await inMemoryUsersRepository.create({
       name: "User Name",
       email: "useremail@test.com",
-      password: "userpasswordtest"
+      password: await hash("userpasswordtest", 8)
     });
 
     const userAuthenticated = await authenticateUserUseCase.execute({
@@ -34,17 +33,17 @@ describe("Authenticate User", () => {
     expect(async () => {
       await authenticateUserUseCase.execute({
         email: "inexistentuser@test.com",
-        password: "anypassword"
+        password: await hash("anypassword", 8)
       });
     }).rejects.toBeInstanceOf(IncorrectEmailOrPasswordError);
   });
 
   it("Should not be able to authenticate a user passing a wrong password", () => {
     expect(async () => {
-      await createUserUseCase.execute({
+      await inMemoryUsersRepository.create({
         name: "User Name",
         email: "useremail@test.com",
-        password: "userpasswordtest"
+        password: await hash("userpasswordtest", 8)
       });
 
       await authenticateUserUseCase.execute({
@@ -56,10 +55,10 @@ describe("Authenticate User", () => {
 
   it("Should not be able to authenticate a user passing a wrong email", () => {
     expect(async () => {
-      await createUserUseCase.execute({
+      await inMemoryUsersRepository.create({
         name: "User Name",
         email: "useremail@test.com",
-        password: "userpasswordtest"
+        password: await hash("userpasswordtest", 8)
       });
 
       await authenticateUserUseCase.execute({

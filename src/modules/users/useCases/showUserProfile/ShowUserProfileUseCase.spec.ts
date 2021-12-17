@@ -1,24 +1,22 @@
 import { InMemoryUsersRepository } from "../../repositories/in-memory/InMemoryUsersRepository";
-import { CreateUserUseCase } from "../createUser/CreateUserUseCase";
 import { ShowUserProfileError } from "./ShowUserProfileError";
 import { ShowUserProfileUseCase } from "./ShowUserProfileUseCase";
+import { hash } from "bcryptjs";
 
-let createUserUseCase: CreateUserUseCase;
 let inMemoryUsersRepository: InMemoryUsersRepository;
 let showUserProfileUseCase: ShowUserProfileUseCase;
 
 describe("Show User Profile", () => {
   beforeEach(() => {
     inMemoryUsersRepository = new InMemoryUsersRepository();
-    createUserUseCase = new CreateUserUseCase(inMemoryUsersRepository);
     showUserProfileUseCase = new ShowUserProfileUseCase(inMemoryUsersRepository);
   });
 
   it("Should be able to show user profile", async () => {
-    const user = await createUserUseCase.execute({
+    const user = await inMemoryUsersRepository.create({
       name: "User Name",
       email: "useremail@test.com",
-      password: "userpasswordtest"
+      password: await hash("userpasswordtest", 8)
     });
 
     const userProfile = await showUserProfileUseCase.execute(user.id as string);
