@@ -7,7 +7,7 @@ import { hash } from 'bcryptjs';
 
 let connection: Connection;
 
-describe("Authenticate User", () => {
+describe("Show user profile", () => {
   beforeAll(async () => {
     connection = await createConnection();
     await connection.runMigrations()
@@ -38,4 +38,5 @@ describe("Authenticate User", () => {
     expect(response.status).toBe(200);
     expect(response.body.email).toBe('useremail@test.com');
   });
+
 });
