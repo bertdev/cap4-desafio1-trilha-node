@@ -32,4 +32,22 @@ describe("Authenticate User", () => {
     expect(response.status).toBe(200);
     expect(response.body).toHaveProperty("token");
   });
+
+  it("Should not be able to authenticate a user passing a wrong password", async () => {
+    const response = await request(app).post("/api/v1/sessions").send({
+      email: "useremail@test.com",
+      password: "wrongpassword"
+    });
+
+    expect(response.status).toBe(401);
+  });
+
+  it("Should not be able to authenticate a user passing a wrong email", async () => {
+    const response = await request(app).post("/api/v1/sessions").send({
+      email: "wronguseremail@test.com",
+      password: "userpassword"
+    });
+
+    expect(response.status).toBe(401);
+  });
 });
