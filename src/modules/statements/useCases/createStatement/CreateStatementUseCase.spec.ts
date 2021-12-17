@@ -1,11 +1,9 @@
 import { InMemoryUsersRepository } from "../../../users/repositories/in-memory/InMemoryUsersRepository";
-import { CreateUserUseCase } from "../../../users/useCases/createUser/CreateUserUseCase";
 import { InMemoryStatementsRepository } from "../../repositories/in-memory/InMemoryStatementsRepository";
 import { CreateStatementUseCase } from "./CreateStatementUseCase";
 import { OperationType } from './../../entities/Statement'
 import { CreateStatementError } from './CreateStatementError'
 
-let createUserUseCase: CreateUserUseCase;
 let inMemoryUsersRepository: InMemoryUsersRepository;
 let createStatementUseCase: CreateStatementUseCase;
 let inMemoryStatementRepository: InMemoryStatementsRepository;
@@ -13,13 +11,12 @@ let inMemoryStatementRepository: InMemoryStatementsRepository;
 describe("Create Statement", () => {
   beforeEach(() => {
     inMemoryUsersRepository = new InMemoryUsersRepository();
-    createUserUseCase = new CreateUserUseCase(inMemoryUsersRepository);
     inMemoryStatementRepository = new InMemoryStatementsRepository();
     createStatementUseCase = new CreateStatementUseCase(inMemoryUsersRepository, inMemoryStatementRepository);
   });
 
   it("Should be able to create a deposit statement", async () => {
-    const user = await createUserUseCase.execute({
+    const user = await inMemoryUsersRepository.create({
       name: "User Name",
       email: "useremail@test.com",
       password: "userpasswordtest"
@@ -38,7 +35,7 @@ describe("Create Statement", () => {
   });
 
   it("Should be able to create a withdraw statement", async () => {
-    const user = await createUserUseCase.execute({
+    const user = await inMemoryUsersRepository.create({
       name: "User Name",
       email: "useremail@test.com",
       password: "userpasswordtest"
@@ -65,20 +62,30 @@ describe("Create Statement", () => {
 
   it("Should not be able to create a withdraw statement if the user has insufficient funds", () => {
     expect(async () => {
-      const user = await createUserUseCase.execute({
+      const user = await inMemoryUsersRepository.create({
         name: "User Name",
         email: "useremail@test.com",
         password: "userpasswordtest"
       });
 
       await createStatementUseCase.execute({
-        user_id: user.id as string,
+        amount: 100,
+        description: "test",
         type: OperationType.WITHDRAW,
-        amount: 600,
-        description: "test"
+        user_id: user.id as string,
       });
     }).rejects.toBeInstanceOf(CreateStatementError.InsufficientFunds);
   });
 
+  it("Should not be able to create any statement with an inexistent user", () => {
+    expect(async () => {
+      await createStatementUseCase.execute({
+        amount: 100,
+        description: "test",
+        type: OperationType.WITHDRAW,
+        user_id: "non-existent",
+      });
+    }).rejects.toBeInstanceOf(CreateStatementError.UserNotFound);
+  });
 
 });
