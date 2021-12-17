@@ -1,6 +1,7 @@
 import { InMemoryUsersRepository } from "../../repositories/in-memory/InMemoryUsersRepository";
 import { CreateUserUseCase } from "../createUser/CreateUserUseCase";
 import { AuthenticateUserUseCase } from "./AuthenticateUserUseCase";
+import { IncorrectEmailOrPasswordError } from "./IncorrectEmailOrPasswordError";
 
 let createUserUseCase: CreateUserUseCase;
 let inMemoryUsersRepository: InMemoryUsersRepository;
@@ -28,6 +29,15 @@ describe("Authenticate User", () => {
     expect(userAuthenticated).toHaveProperty("token");
     expect(userAuthenticated.user.email).toBe("useremail@test.com");
   });
+
+  it("Should not be able to authenticate an inexistent user", () => {
+    expect(async () => {
+      await authenticateUserUseCase.execute({
+        email: "inexistentuser@test.com",
+        password: "anypassword"
+      });
+    }).rejects.toBeInstanceOf(IncorrectEmailOrPasswordError);
+  })
 
 
 });
